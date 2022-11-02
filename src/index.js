@@ -19,47 +19,60 @@ function getInputValue(evt) {
     
     const inputValue = evt.target.value;
     // console.log("🚀 ~ inputValue", inputValue);
-const url = "https://restcountries.com/v3.1/name";
+    const url = "https://restcountries.com/v3.1/name";
 
 fetch(`${url}/${inputValue}`)
         .then(response => 
         response.json()
         ).then(data => {
-        goToOpenApiObject(data) 
-        const d = data
-
-        console.log("🚀 ~ data", d);
+        const objData = data[0];
+        goToOpenApiObject(objData);
+       
         })
         .catch(error => {
         console.log(error);
         })
+}
    
 
+
+   
+function goToOpenApiObject(objData) {
+    // console.log("🚀 ~ objData", objData);
+
+    const {official} = objData.name;
+    const {population,capital,languages} = objData;
+    const { svg } = objData.flags;
+    const languagesValue = Object.values(languages).join(',');  
+    const allObj = { svg, official, capital, population, languagesValue };
     
-
-}
-   
-function goToOpenApiObject(data) {
-     data.forEach(element => {
-        const {official} = element.name;
-        const {capital} = element;
-        const population = element.population.toString();
-        const flag = element.flags.svg;
-        const languageObj = element.languages
-        const languagesValue = Object.values(languageObj).join(',');
-        // console.log("🚀 ~ country", country);
-    //    return { country, capital, population, flag, languagesValue };
-    const markupCountryList = `<li class="contry-item"><img src="${flag}" alt="" width="40" height="30"></li>
-    <li class="contry-item">${official}</li>`;
-    countryList.insertAdjacentHTML('beforeend' , markupCountryList)
-}) 
+    // markupCountryList(svg, official);
+    markupCountryInfo(allObj);
 }
 
 
 
 
-function markupCountryList() {
-     
+// function markupCountryList(svg ,official) {
+//         const markupCountryList = `<li class="contry-item"><img src="${svg}" alt="" width="40" height="30"></li>
+//     <li class="contry-item">${official}</li>`;
+    
+//     countryList.insertAdjacentHTML('beforeend' , markupCountryList) 
+// }
+
+
+function markupCountryInfo(allObj) {
+
+    const { svg, official, capital, population, languagesValue } = allObj;
+    
+    const markupCountryInfo = `<ul>
+    <li class="contry-item"><img src="${svg}" alt="" width="40" height="30"></li>
+    <li class="contry-item">${official}</li>
+    <li class="contry-item">Capita: ${capital}</li>
+    <li class="contry-item">Population: ${population}</li>
+    <li class="contry-item">Languages: ${languagesValue}</li></ul>`;
+    
+    countryInfo.insertAdjacentHTML('beforeend' , markupCountryInfo) 
 }
     
         
