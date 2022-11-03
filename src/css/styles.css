@@ -24,3 +24,9 @@ body {
 li{
   list-style: none;
 }
+.country-wrap{
+  display: flex;
+}
+.font-size{
+  font-size: x-large;
+}
