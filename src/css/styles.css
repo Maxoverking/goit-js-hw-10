@@ -24,9 +24,11 @@ body {
 li{
   list-style: none;
 }
-.country-wrap{
-  display: flex;
+.country-row{
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
-.font-size{
+.font-country-info{
   font-size: x-large;
 }

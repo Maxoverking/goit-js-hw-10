@@ -5,103 +5,77 @@ import { Notify } from 'notiflix/build/notiflix-notify-aio';
 const DEBOUNCE_DELAY = 300;
 
 //============================================================
-
 const countryList = document.querySelector('.country-list');
-countryList.style.display = 'flex';  
-countryList.style.flexDirection = 'column';
-
-//============================================================
-
 const countryInfo = document.querySelector('.country-info');
-
 //============================================================
 
 const input = document.getElementById('search-box');
 
-input.addEventListener('input', debounce(getInputValue, DEBOUNCE_DELAY));
+input.addEventListener('input', debounce(inSearchCountries, DEBOUNCE_DELAY));
 
-function getInputValue(evt) {
+function inSearchCountries(evt) {   
     evt.preventDefault();
-    const inputValue = input.value.trim();  
-    if (inputValue.length === 0) {
-        countryList.innerHTML = '';
+
+    const inputValue = evt.target.value.trim();  
+    if (inputValue === '') {
+       countryList.innerHTML = ''; 
     return;
     }
+    cleanDocument(); 
 
     fetchCountries(inputValue)
-        .then(goToOpenApiArray)
-        .catch(error => Notify.failure("Oops, there is no country with that name"))
-}
+        .then(data => {
 
-// function fetchCountries(inputValue) {
-    
-// const url = "https://restcountries.com/v2/name/";
-// const field = "?fields=name,capital,population,flags,languages";
-    
-// fetch(`${url}${inputValue}${field}`)
-//     .then(response => {
-//         return response.json();       
-//     })
-//     .then(goToOpenApiArray)
-//     .catch(error =>
-//         Notify.failure("Oops, there is no country with that name")
-//     )         
-// }
-
-function goToOpenApiArray(data) {
-    // console.log("🚀 ~ data", data.length);  
-
-    if (data.length >= 10) {
-        Notify.info("Too many matches found. Please enter a more specific name.");
-        countryList.innerHTML = '';
-        countryInfo.innerHTML = '';
+        if (data.length >= 10) {
+            Notify.info("Too many matches found. Please enter a more specific name.",
+                    {clickToClose:true , position: "center-top",width:'320px',fontSize:'20px'});
         return;
-    }
-    
-    data.forEach(element => {
-        
-        const {flags, name} = element;
-
-        let languagesArray = [];
-
-        element.languages.forEach(el => {
-            const allValueLanguages = [Object.values(el.name).join('')];
-            languagesArray.push(...allValueLanguages); 
-            
-        });
-        const allLanguagesAvailable = languagesArray.join(', ');  
-        
-        if (data.length === 1) {
-            markupCountryInfo(element, allLanguagesAvailable); 
-            countryList.innerHTML = '';
+        }else if (data.length === 1) {
+            oneCountry(data); 
             return;
         } else {
-            markupCountryList(flags, name); 
-            countryInfo.innerHTML = '';
-        }   
+            listOfAllCountries(data);
+            }
+        }).catch(error =>
+            Notify.failure("Oops, there is no country with that name",
+            {position: "center-top",width:'420px',fontSize:'20px'}))
+}
+
+function listOfAllCountries(data) {
+    data.forEach(object => {        
+        const { flags, name } = object;
         
-}); 
+        const markupAllCountry = 
+        `<li class="country-row">
+        <img src="${flags.svg}" alt="${name}" width="40" height="30">
+        ${name}</li>`;
+    countryList.insertAdjacentHTML('beforeend', markupAllCountry);
+    })
 }
 
-function markupCountryList(flags, name) {
-    const markupCountryList = `<div class="country-wrap">
-    <li class="contry-item"><img src="${flags.svg}" alt="" width="40" height="30"></li>
-    <li class="contry-item">${name}</li></div>`;
-
-    countryList.insertAdjacentHTML('beforeend', markupCountryList);
+function oneCountry(data) {
+        data.forEach(object => {
+            const { flags, name, population, capital } = object;
+            
+            let languagesArray = [];           
+            object.languages.forEach(el => {
+            const allValueLanguages = [Object.values(el.name).join('')];
+            languagesArray.push(...allValueLanguages);             
+            });
+            const languagesInCountry = languagesArray.join(', ');  
+            
+            const markupOneCountry =
+            `<ul><li class="country-row"><img src="${flags.svg}" alt="${name}" width="60" height="50">
+            <span class="font-country-info">${name}</span></li>           
+            <p>Capital: ${capital}</p>
+            <p>Population: ${population}</p>
+            <p>Languages: ${languagesInCountry}</p></ul>`;
+                    
+        countryInfo.insertAdjacentHTML('beforeend', markupOneCountry);       
+        });  
 }
 
-function markupCountryInfo(element,languagesValue) {
-    const {flags,name,population,capital} = element;
-
-    const markupCountryInDiv = `<ul><div class="country-wrap">
-    <li class="contry-item"><img src="${flags.svg}" alt="" width="40" height="30"></li>
-    <li class="contry-item font-size">${name}</li>
-    </div>
-    <li class="contry-item">Capital: ${capital}</li>
-    <li class="contry-item">Population: ${population}</li>
-    <li class="contry-item">Languages: ${languagesValue}</li></ul>`;
-
-
-   countryInfo.insertAdjacentHTML('beforeend', markupCountryInDiv);   
+function cleanDocument() {
+    countryList.innerHTML = '';
+    countryInfo.innerHTML = '';
 }
