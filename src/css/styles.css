@@ -30,5 +30,6 @@ li{
     align-items: center;
 }
 .font-country-info{
-  font-size: x-large;
+  font-size: xx-large;
+  font-weight: 600;
 }

@@ -38,7 +38,7 @@ function inSearchCountries(evt) {
             }
         }).catch(error =>
             Notify.failure("Oops, there is no country with that name",
-            {position: "center-top",width:'420px',fontSize:'20px'}))
+                { position: "center-top", width: '420px', fontSize: '20px' }))
 }
 
 function listOfAllCountries(data) {
