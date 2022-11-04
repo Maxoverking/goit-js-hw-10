@@ -1,5 +1,6 @@
 import './css/styles.css';
 import debounce from 'lodash.debounce';
+import {fetchCountries} from './fetchCountries'
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 const DEBOUNCE_DELAY = 300;
 
@@ -17,62 +18,68 @@ const countryInfo = document.querySelector('.country-info');
 
 const input = document.getElementById('search-box');
 
-input.addEventListener('input', debounce( getInputValue, DEBOUNCE_DELAY));
+input.addEventListener('input', debounce(getInputValue, DEBOUNCE_DELAY));
 
 function getInputValue(evt) {
     evt.preventDefault();
+    const inputValue = input.value.trim();  
+    if (inputValue.length === 0) {
+        countryList.innerHTML = '';
+    return;
+    }
 
-    const inputValue = evt.target.value.trim();
-    
-    const url = "https://restcountries.com/v2/name";
-    const field = "fields=name,capital,population,flags,languages";
-    
-    fetch(`${url}/${inputValue}?${field}`)
-            .then(response => 
-            response.json()
-            ).then(data => {       
-                goToOpenApiArray(data); 
-
-                console.log("🚀 ~ data", data);              
-            })
-            .catch(error => {
-            console.log(error);
-            })   
-     
+    fetchCountries(inputValue)
+        .then(goToOpenApiArray)
+        .catch(error => Notify.failure("Oops, there is no country with that name"))
 }
 
+// function fetchCountries(inputValue) {
+    
+// const url = "https://restcountries.com/v2/name/";
+// const field = "?fields=name,capital,population,flags,languages";
+    
+// fetch(`${url}${inputValue}${field}`)
+//     .then(response => {
+//         return response.json();       
+//     })
+//     .then(goToOpenApiArray)
+//     .catch(error =>
+//         Notify.failure("Oops, there is no country with that name")
+//     )         
+// }
+
 function goToOpenApiArray(data) {
-    console.log("🚀 ~ data", data.length);  
+    // console.log("🚀 ~ data", data.length);  
 
     if (data.length >= 10) {
         Notify.info("Too many matches found. Please enter a more specific name.");
         countryList.innerHTML = '';
         countryInfo.innerHTML = '';
-         return;
-    }else if (data.length === undefined) {
-        countryList.innerHTML = '';
-        return; 
+        return;
     }
     
     data.forEach(element => {
+        
         const {flags, name} = element;
 
         let languagesArray = [];
 
         element.languages.forEach(el => {
             const allValueLanguages = [Object.values(el.name).join('')];
-            languagesArray.push(...allValueLanguages);    
+            languagesArray.push(...allValueLanguages); 
+            
         });
         const allLanguagesAvailable = languagesArray.join(', ');  
         
         if (data.length === 1) {
             markupCountryInfo(element, allLanguagesAvailable); 
             countryList.innerHTML = '';
-            
+            return;
         } else {
             markupCountryList(flags, name); 
             countryInfo.innerHTML = '';
-        }            
+        }   
+        
 }); 
 }
 
@@ -94,5 +101,7 @@ function markupCountryInfo(element,languagesValue) {
     <li class="contry-item">Capital: ${capital}</li>
     <li class="contry-item">Population: ${population}</li>
     <li class="contry-item">Languages: ${languagesValue}</li></ul>`;
+
+
    countryInfo.insertAdjacentHTML('beforeend', markupCountryInDiv);   
 }
