@@ -18,7 +18,7 @@ function inSearchCountries(evt) {
 
     const inputValue = evt.target.value.trim();  
     if (inputValue === '') {
-       countryList.innerHTML = ''; 
+       cleanDocument();; 
     return;
     }
     cleanDocument(); 
